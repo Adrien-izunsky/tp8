@@ -1,55 +1,55 @@
 package champollion;
 
-/**
- * Un enseignant est caractérisé par les informations suivantes : son nom, son adresse email, et son service prévu,
- * et son emploi du temps.
- */
-public class Enseignant extends Personne {
+import java.util.HashSet;
+import java.util.Set;
 
-    // TODO : rajouter les autres méthodes présentes dans le diagramme UML
+public class Enseignant extends Personne {
+    private ServicePrevu servicePrevu = new ServicePrevu();
+    private Set<Intervention> interventions = new HashSet<>();
 
     public Enseignant(String nom, String email) {
         super(nom, email);
     }
 
-    /**
-     * Calcule le nombre total d'heures prévues pour cet enseignant en "heures équivalent TD" Pour le calcul : 1 heure
-     * de cours magistral vaut 1,5 h "équivalent TD" 1 heure de TD vaut 1h "équivalent TD" 1 heure de TP vaut 0,75h
-     * "équivalent TD"
-     *
-     * @return le nombre total d'heures "équivalent TD" prévues pour cet enseignant, arrondi à l'entier le plus proche
-     *
-     */
-    public int heuresPrevues() {
-        // TODO: Implémenter cette méthode
-        throw new UnsupportedOperationException("Pas encore implémenté");
-    }
-
-    /**
-     * Calcule le nombre total d'heures prévues pour cet enseignant dans l'UE spécifiée en "heures équivalent TD" Pour
-     * le calcul : 1 heure de cours magistral vaut 1,5 h "équivalent TD" 1 heure de TD vaut 1h "équivalent TD" 1 heure
-     * de TP vaut 0,75h "équivalent TD"
-     *
-     * @param ue l'UE concernée
-     * @return le nombre total d'heures "équivalent TD" prévues pour cet enseignant, arrondi à l'entier le plus proche
-     *
-     */
-    public int heuresPrevuesPourUE(UE ue) {
-        // TODO: Implémenter cette méthode
-        throw new UnsupportedOperationException("Pas encore implémenté");
-    }
-
-    /**
-     * Ajoute un enseignement au service prévu pour cet enseignant
-     *
-     * @param ue l'UE concernée
-     * @param volumeCM le volume d'heures de cours magistral
-     * @param volumeTD le volume d'heures de TD
-     * @param volumeTP le volume d'heures de TP
-     */
     public void ajouteEnseignement(UE ue, int volumeCM, int volumeTD, int volumeTP) {
-        // TODO: Implémenter cette méthode
-        throw new UnsupportedOperationException("Pas encore implémenté");
+        servicePrevu.ajouterEnseignement(ue, TypeIntervention.CM, volumeCM);
+        servicePrevu.ajouterEnseignement(ue, TypeIntervention.TD, volumeTD);
+        servicePrevu.ajouterEnseignement(ue, TypeIntervention.TP, volumeTP);
     }
 
+    public int heuresPrevues() {
+        return servicePrevu.heuresEquivalentes();
+    }
+
+    public int heuresPrevuesPourUE(UE ue) {
+        int total = 0;
+        total += servicePrevu.getHeuresPourUE(ue, TypeIntervention.CM) * 1.5;
+        total += servicePrevu.getHeuresPourUE(ue, TypeIntervention.TD);
+        total += servicePrevu.getHeuresPourUE(ue, TypeIntervention.TP) * 0.75;
+        return (int) Math.round(total);
+    }
+
+    public void ajouteIntervention(Intervention intervention) throws Exception {
+        UE ue = intervention.getUe();
+        TypeIntervention type = intervention.getType();
+        int heuresPlanifiees = intervention.getHeures();
+
+        // Vérifie que l'on ne dépasse pas le service prévu
+        int heuresRestantes = servicePrevu.getHeuresPourUE(ue, type) - heuresPlanifiees;
+        if (heuresRestantes < 0) {
+            throw new Exception("Excédent d'heures pour l'intervention");
+        }
+
+        interventions.add(intervention);
+    }
+
+    public int resteAPlanifier(TypeIntervention type, UE ue) {
+        int heuresPlanifiees = 0;
+        for (Intervention intervention : interventions) {
+            if (intervention.getUe().equals(ue) && intervention.getType().equals(type)) {
+                heuresPlanifiees += intervention.getHeures();
+            }
+        }
+        return servicePrevu.getHeuresPourUE(ue, type) - heuresPlanifiees;
+    }
 }

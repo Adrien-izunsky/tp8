@@ -1,28 +1,27 @@
 package champollion;
 
-/**
- * Un exemple d'utilisation des classes
- */
+import java.util.Date;
+
 public class Main {
     public static void main(String[] args) {
-        Enseignant bastide = new Enseignant("Rémi Bastide", "Remi.Bastide@irit.fr");
-        Enseignant lamine = new Enseignant("Elyes Lamine", "Elyes.Lamine@univ-jfc.fr");
+        try {
+            // Création des enseignants, salles et UE
+            Enseignant enseignant = new Enseignant("John Doe", "johndoe@example.com");
+            Salle salle = new Salle("Salle A", 50);
+            UE uml = new UE("UML");
 
-        UE uml = new UE("Conception par objets avec UML");
-        UE bd = new UE("Bases de données");
-        UE web = new UE("Technologies web");
+            // Ajout d'enseignements
+            enseignant.ajouteEnseignement(uml, 10, 5, 5);  // 10h CM, 5h TD, 5h TP
 
-        bastide.ajouteEnseignement(uml, 12, 20, 20);
-        bastide.ajouteEnseignement(web, 8, 20, 30);
-        lamine.ajouteEnseignement(bd, 10, 20, 15);
-        lamine.ajouteEnseignement(web, 15, 15, 25);
+            // Ajout d'interventions
+            Intervention intervention1 = new Intervention(uml, TypeIntervention.TP, new Date(), 3, salle);
+            enseignant.ajouteIntervention(intervention1); // On ajoute une intervention TP de 3 heures
 
-        System.out.printf("Mr. %s a un total de %d heures prévues%n", bastide.getNom(), bastide.heuresPrevues());
-        System.out.printf("Mr. %s a un total de %d heures prévues%n", lamine.getNom(), lamine.heuresPrevues());
-        System.out.printf("Mr. %s a un total de %d heures prévues dans l'UE %s%n",
-                bastide.getNom(),
-                bastide.heuresPrevuesPourUE(uml),
-                uml.getIntitule());
+            // Affichage du service prévu et des heures restantes à planifier
+            System.out.println("Heures prévues pour 'UML': " + enseignant.heuresPrevuesPourUE(uml));
+            System.out.println("Heures restantes pour 'UML' TP: " + enseignant.resteAPlanifier(TypeIntervention.TP, uml));
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
     }
-
 }
